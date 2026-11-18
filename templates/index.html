@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Fuel Efficiency Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ── Header ──────────────────────────────────────────── -->
+    <header class="header">
+        <span class="icon">⛽</span>
+        <h1>Vehicle Fuel Efficiency Predictor</h1>
+        <p>Enter your vehicle specifications to predict fuel efficiency using Machine Learning</p>
+    </header>
+
+    <!-- ── Main Form ───────────────────────────────────────── -->
+    <main class="container">
+        <form id="predict-form">
+            <div class="form-grid">
+
+                <!-- Fuel Type -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">⛽</span>
+                        Fuel Type
+                    </label>
+                    <select id="fuel-type" required>
+                        <option value="" disabled selected>Select fuel type</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="CNG">CNG</option>
+                    </select>
+                    <div class="input-hint">💡 Diesel engines are generally more fuel-efficient</div>
+                </div>
+
+                <!-- Engine Displacement -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🔧</span>
+                        Engine Displacement (CC)
+                    </label>
+                    <input type="number" id="engine-cc" min="0" max="4500" step="1" placeholder="e.g., 1197" required>
+                    <div class="input-hint">💡 Typical range: 800 CC (small) to 4000 CC (large)</div>
+                </div>
+
+                <!-- Cylinders -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🔩</span>
+                        Number of Cylinders
+                    </label>
+                    <input type="number" id="cylinders" min="2" max="12" step="1" placeholder="e.g., 4" required>
+                    <div class="input-hint">💡 Most cars: 3-4 | Performance cars: 6-8 | Supercars: 10-12</div>
+                </div>
+
+                <!-- Number of Gears -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">⚙️</span>
+                        Number of Gears
+                    </label>
+                    <input type="number" id="gears" min="4" max="10" step="1" placeholder="e.g., 5" required>
+                    <div class="input-hint">💡 More gears allow better optimization across speeds</div>
+                </div>
+
+                <!-- Power -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🐎</span>
+                        Power (HP)
+                    </label>
+                    <input type="number" id="power-hp" min="40" max="500" step="1" placeholder="e.g., 110" required>
+                    <div class="input-hint">💡 Higher power = more fuel consumption generally</div>
+                </div>
+
+                <!-- Transmission Type -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🕹️</span>
+                        Transmission Type
+                    </label>
+                    <select id="transmission" required>
+                        <option value="" disabled selected>Select transmission</option>
+                        <option value="Manual">Manual</option>
+                        <option value="iVT">Automatic (iVT)</option>
+                        <option value="AMT">Automatic (AMT)</option>
+                        <option value="DCT">Automatic (DCT)</option>
+                        <option value="Torque Converter">Automatic (Torque Converter)</option>
+                    </select>
+                    <div class="input-hint">💡 iVT & DCT are the most fuel-efficient automatics</div>
+                </div>
+
+                <!-- Body Type -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🚗</span>
+                        Vehicle Body Type
+                    </label>
+                    <select id="body-type" required>
+                        <option value="" disabled selected>Select body type</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="Sub-compact SUV">Sub-compact SUV</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Off-Road">Off-Road</option>
+                    </select>
+                    <div class="input-hint">💡 Lighter vehicles (hatchbacks) are more efficient</div>
+                </div>
+
+                <!-- Driving Condition -->
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🛣️</span>
+                        Driving Conditions
+                    </label>
+                    <select id="driving-condition" required>
+                        <option value="" disabled selected>Select driving condition</option>
+                        <option value="City">City</option>
+                        <option value="Highway">Highway</option>
+                        <option value="Mixed">Mixed</option>
+                    </select>
+                    <div class="input-hint">💡 Highway driving is ~15-20% more efficient than city</div>
+                </div>
+
+            </div>
+
+            <!-- Predict Button -->
+            <div class="predict-section">
+                <button type="submit" class="btn-predict" id="predict-btn">
+                    <span id="btn-text">⚡ Predict Efficiency</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- ── Result Display ──────────────────────────────── -->
+        <section id="result-section" class="result-section">
+            <div class="result-card">
+                <div class="gauge-container">
+                    <div class="gauge-bg"></div>
+                    <div class="gauge-needle" id="gauge-needle"></div>
+                </div>
+                <div class="result-label">Predicted Fuel Efficiency</div>
+                <div>
+                    <span class="result-value" id="result-value">0.0</span>
+                    <span class="result-value"><span class="unit" id="result-unit">km/l</span></span>
+                </div>
+                <span class="result-badge" id="result-badge"></span>
+            </div>
+        </section>
+
+        <!-- ── Factor Explanations ─────────────────────────── -->
+        <section class="info-section">
+            <h2>📖 Understanding the Factors</h2>
+            <div class="info-grid">
+
+                <div class="info-card">
+                    <h3>⛽ Fuel Type</h3>
+                    <p>
+                        <strong>Petrol</strong> engines are common and affordable but consume more fuel.
+                        <strong>Diesel</strong> engines provide ~20-30% better fuel efficiency due to higher compression ratios and energy-dense fuel.
+                        <strong>CNG</strong> is the cheapest per km but requires larger tanks and may reduce boot space.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔧 Engine Displacement (CC)</h3>
+                    <p>
+                        Measured in Cubic Centimeters (CC), this indicates the total volume of all cylinders.
+                        <strong>Smaller engines</strong> (800-1200 CC) are more fuel-efficient.
+                        <strong>Larger engines</strong> (2000+ CC) produce more power but consume more fuel.
+                        A 1.2L engine in a hatchback vs a 3.0L in an SUV can differ by 10+ km/l.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔩 Number of Cylinders</h3>
+                    <p>
+                        Cylinders are chambers where fuel combustion occurs.
+                        <strong>3-cylinder</strong> engines are fuel-efficient (small cars).
+                        <strong>4-cylinder</strong> engines balance power and efficiency (most common).
+                        <strong>6-8 cylinders</strong> provide high power but reduced efficiency (SUVs, sports cars).
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>⚙️ Number of Gears</h3>
+                    <p>
+                        More gears allow the engine to stay in its optimal RPM range across speeds.
+                        <strong>5-speed</strong> is standard for budget cars.
+                        <strong>6-7 speed</strong> improves highway efficiency by ~3-5%.
+                        <strong>8+ speed</strong> transmissions offer the finest gear ratio optimization.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🐎 Power (HP)</h3>
+                    <p>
+                        Horsepower measures the engine's output.
+                        <strong>60-100 HP</strong> is typical for city hatchbacks.
+                        <strong>100-170 HP</strong> suits sedans and compact SUVs.
+                        <strong>200+ HP</strong> is for performance-oriented vehicles. Higher power generally means higher fuel consumption, as larger/tuned engines burn more fuel.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🕹️ Transmission Type</h3>
+                    <p>
+                        <strong>Manual</strong> — Driver-controlled, efficient when driven well.<br>
+                        <strong>AMT</strong> — Automated Manual; affordable, similar efficiency to manual.<br>
+                        <strong>DCT</strong> — Dual Clutch; fast shifts, very fuel-efficient.<br>
+                        <strong>iVT</strong> — Intelligent Variable; seamless, best for city driving.<br>
+                        <strong>Torque Converter</strong> — Smooth but slightly less efficient.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🚗 Vehicle Body Type</h3>
+                    <p>
+                        <strong>Hatchback</strong> — Lightest, best efficiency, compact city car.<br>
+                        <strong>Sedan</strong> — Moderate weight, good aerodynamics, balanced.<br>
+                        <strong>Sub-compact SUV</strong> — Raised hatchback, slightly less efficient.<br>
+                        <strong>SUV</strong> — Heavy, high drag, significantly lower efficiency.<br>
+                        <strong>Off-Road</strong> — Heaviest, worst aerodynamics, lowest efficiency.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🛣️ Driving Conditions</h3>
+                    <p>
+                        <strong>City</strong> — Frequent stops, idling, and low-speed driving use 15-20% more fuel than mixed conditions.
+                        <strong>Highway</strong> — Steady cruising at optimal RPM is 15% more efficient.
+                        <strong>Mixed</strong> — A blend of both; this is the standard test condition used by manufacturers.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ── Footer ──────────────────────────────────────────── -->
+    <footer class="footer">
+        <p>Vehicle Fuel Efficiency Predictor &bull; Powered by Machine Learning (Random Forest Regressor)</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
